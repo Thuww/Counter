@@ -210,7 +210,10 @@
       }
     </style>
   </head>
+
   <body>
+    <!-- ... (Các phần khác của trang) ... -->
+
     <div class="block1">
       <p>REWES</p>
       <div class="imgz">
@@ -222,11 +225,11 @@
       </div>
     </div>
     <div id="date" class="block2"></div>
-    <div id="adress" onclick="openForm()" class="block3"></div>
-    <div id="server-status" class="sever"></div>
+    <div id="address" onclick="openForm()" class="block3"></div>
+    <div id="server-status" class="server"></div>
     <div id="server-status-station" class="server"></div>
     <div id="station">
-      <button class="btn">Tram4</button>
+      <button class="btn">Tram1</button>
       <button class="btn">Tram2</button>
     </div>
     <div id="station"></div>
@@ -266,125 +269,93 @@
     </div>
 
     <script>
-            var stationID = "";
-            var socket = io();
-            var stationName = "";
-            var nameid = "";
-            function openForm() {
-        document.getElementById("myForm").style.display = "block";
-      }
+      var stationID = "";
+      var socket = io();
+      var stationName = "";
+      var nameid = "";
 
-      function closeForm() {
-        document.getElementById("myForm").style.display = "none";
-      }
-
-            function redirectURL(){window.location=createDynamicURL();}
-            function createDynamicURL(){//Forming variable to be returned var URL;
-            //Forming the variable to returned
-          URL="https://rewes1.glitch.me/";
-        URL+=stationName;
-      return URL;}
-      function redirectURLuSv(){window.location=createDynamicURLuSv();}
-      function createDynamicURLuSv(){//the variable to be returned
-      var URL;
-      // Forming the variable to return
-      URLu="https://rewes.glitch.me/uSv/";
-      URLu+=stationName;
-      return URLu;}
-      funtion redirectURLuSv4(){window.location=createDynamicURLuSv4();}
-      function createDynamicURLuSv4(){//the variable to be returned var URLu10;
-      //Forming the variable to return
-      URLu10="https://rewes1.glitch.me/uSv4/";
-      URLu10+=stationName;
-      return URLu10;}
       function dongho() {
-            var today = new Date();
-            var day = today.getDate()
-            var month = today.getMonth() + 1;
-            if (month < 10) {
-                month = "0" + month;
-            }
-            if (day < 10) {
-                day = "0" + day;
-            }
-            var date = day + '-' + month + '-' + today.getFullYear();
-            var gio = today.getHours();
-            var phut = today.getMinutes();
-            var giay = today.getSeconds();
-            if (gio < 10)
-                gio = "0" + gio;
-            if (phut < 10)
-                phut = "0" + phut;
-            if (giay < 10)
-                giay = "0" + giay;
-            var time = gio + ":" + phut + ":" + giay;
-            var dateTime = date + " " + time;
-            setTimeout("dongho()", 1000);
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.getMonth() + 1;
+        if (month < 10) {
+          month = "0" + month;
         }
-        dongho();
+        if (day < 10) {
+          day = "0" + day;
+        }
+        var date = day + "-" + month + "-" + today.getFullYear();
+        var gio = today.getHours();
+        var phut = today.getMinutes();
+        var giay = today.getSeconds();
+        if (gio < 10) gio = "0" + gio;
+        if (phut < 10) phut = "0" + phut;
+        if (giay < 10) giay = "0" + giay;
+        var time = gio + ":" + phut + ":" + giay;
+        var dateTime = date + " " + time;
+        setTimeout("dongho()", 1000);
+      }
+      dongho();
 
-        socket.on("stations", msg => {
-            $("#stations").empty();
-            console.log(msg);
-            msg.forEach(element => {
-                let isActiveTxt = element.id === stationID ? "active" : "";
-                let txt = $(`<button id=${element.id} class="btn ${isActiveTxt}"></button>`).text(element.name);
-                $("#stations").append(txt);
-                $(`#${element.id}`).click(function() {
-                    stationID = element.id;
-                    console.log(element.name);
-                    socket.emit("join-room", element.id);
-                    let current = document.getElementsByClassName("active");
+      socket.on("stations", (msg) => {
+        // ... (Xóa hoặc chỉnh sửa phần hiển thị các trạm và xử lý sự kiện click)
+        $("#stations").empty();
+        console.log(msg);
+        msg.forEach((element) => {
+          let isActiveTxt = element.id === stationID ? "active" : "";
+          let txt = $(
+            `<button id=${element.id} class="btn ${isActiveTxt}"></button>`
+          ).text(element.name);
+          $("#stations").append(txt);
+          $(`#${element.id}`).click(function () {
+            stationID = element.id;
+            console.log(element.name);
+            socket.emit("join-room", element.id);
+            let current = document.getElementsByClassName("active");
 
-                    console.log(current);
-                    if (current.length > 0) {
-                        current[0].className = current[0].className.replace("active", "");
-
-                    }
-                    $(`#${element.id}`).addClass("active")
-                    stationName = element.name;
-                    nameid = stationID;
-                })
-            });
-        })
-
-        socket.on('temp2web', (msg) => {
-            $('#tempC').text(msg.tempC);
-            $('#humi').text(msg.humi);
-            $('#cps').text(msg.cps);
-            $('#uSv').text(msg.uSv);
-            $('#counts').text(msg.counts);
-            $('#server-status-station').text(msg.statusStation);
-            $('#date').text(msg.date);
-            $('#address').text(msg.address);
-
-          if(msg.uSv > "1")
-            {
-              document.getElementById("blockusv").style.backgroundColor = "#FFA129";
+            console.log(current);
+            if (current.length > 0) {
+              current[0].className = current[0].className.replace("active", "");
             }
-          else{
-            document.getElementById("blockusv").style.backgroundColor = "#f8e098";
-          }
-        })
-
-        socket.on("connect", () => {
-            console.log("user ", socket.id, " connected");
-            $("#server-status").text("Server connected")
+            $(`#${element.id}`).addClass("active");
+            stationName = element.name;
+            nameid = stationID;
+          });
         });
+      });
 
-        socket.on("disconnect", () => {
-            console.log("user ", socket.id, " disconnected");
-            $("#server-status").text("Server disconnected");
-            $("#stations").empty();
-            $('#tempC').text("");
-            $('#cps').text("");
-            $('#uSv').text("");
-            $('#humi').text("");
-            $('#counts').text("");
-            $('#address').text("");
-            $('#date').text("");
+      socket.on("temp2web", (msg) => {
+        // ... (Xử lý dữ liệu từ server)
+        $("#tempC").text(msg.tempC);
+        $("#humi").text(msg.humi);
+        $("#cps").text(msg.cps);
+        $("#uSv").text(msg.uSv);
+        $("#counts").text(msg.counts);
+        $("#server-status-station").text(msg.statusStation);
+        $("#date").text(msg.date);
+        $("#address").text(msg.address);
+      });
 
-            document.getElementById("blockusv").style.backgroundColor = "#f8e098";});
+      socket.on("connect", () => {
+        console.log("user ", socket.id, " connected");
+        $("#server-status").text("Server connected");
+      });
+
+      socket.on("disconnect", () => {
+        console.log("user ", socket.id, " disconnected");
+        $("#server-status").text("Server disconnected");
+        // ... (Xử lý khi kết nối bị đóng)
+        $("#stations").empty();
+        $("#tempC").text("");
+        $("#cps").text("");
+        $("#uSv").text("");
+        $("#humi").text("");
+        $("#counts").text("");
+        $("#address").text("");
+        $("#date").text("");
+
+        document.getElementById("blockusv").style.backgroundColor = "#f8e098";
+      });
     </script>
   </body>
 </html>
